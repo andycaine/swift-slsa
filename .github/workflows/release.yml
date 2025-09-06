@@ -11,7 +11,7 @@ permissions:
 jobs:
   build:
     outputs:
-      hashes: ${{ steps.hash.ouputs.hashes }}
+      hashes: ${{ steps.hash.outputs.hashes }}
     runs-on: macos-latest
 
     steps:

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-VERSION := 0.2.4
+VERSION := 0.2.5
 
 tag:
 	git tag -a v$(VERSION) -m "Release $(VERSION)"
