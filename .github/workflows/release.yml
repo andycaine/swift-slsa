@@ -56,8 +56,6 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
-      upload-assets: true
-      draft-release: true
 
   release:
     needs: [build, provenance]
@@ -69,8 +67,12 @@ jobs:
       - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
           name: swift-slsa-${{ github.ref_name }}.tar.gz
+      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          name: swift-slsa-${{ github.ref_name }}.tar.gz.intoto.jsonl
       - name: Create github release
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
           files: |
             swift-slsa-${{ github.ref_name }}.tar.gz
+            swift-slsa-${{ github.ref_name }}.tar.gz.intoto.jsonl
