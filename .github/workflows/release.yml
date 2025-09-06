@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "hashes=$(sha256sum swift-slsa-${GITHUB_REF_NAME}.tar.gz | base64 -w0)" >> "$GITHUB_OUTPUT"
       - name: Upload artifact
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: swift-slsa-${{ github.ref_name }}.tar.gz
           path: .build/universal/release/swift-slsa-${{ github.ref_name }}.tar.gz
