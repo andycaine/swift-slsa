@@ -6,17 +6,19 @@ on:
       - "v*.*.*"
 
 permissions:
-  id-token: write
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  build:
+    outputs:
+      hashes: ${{ steps.hash.ouputs.hashes }}
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - run: sudo xcrun xcode-select -s /Applications/Xcode_16.4.app
-      - run: |
+      - name: Build artifacts
+        run: |
           swift --version
           swift build -c release --arch arm64
           swift build -c release --arch x86_64
@@ -26,8 +28,40 @@ jobs:
             .build/x86_64-apple-macosx/release/swift-slsa
           cd .build/universal/release
           tar -czf swift-slsa-${GITHUB_REF_NAME}.tar.gz swift-slsa
+      - name: Generate hashes
+        shell: bash
+        id: bash
+        run: |
+          echo "hashes=$(sha256sum swift-slsa-${GITHUB_REF_NAME}.tar.gz | base64 -w0)" >> "$GITHUB_OUTPUT"
+      - name: Upload artifact
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        with:
+          name: swift-slsa-${{ github.ref_name }}.tar.gz
+          path: .build/universal/release/swift-slsa-${{ github.ref_name }}.tar.gz
+          if-no-files-found: error
+          retention-days: 5
+
+  provenance:
+    needs: [build]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.build.outputs.hashes }}"
+      upload-assets: true
+
+  release:
+    needs: [build, provenance]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          name: swift-slsa-${{ github.ref_name }}.tar.gz
       - name: Create github release
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
           files: |
-            .build/universal/release/swift-slsa-${{ github.ref_name }}.tar.gz
+            swift-slsa-${{ github.ref_name }}.tar.gz
