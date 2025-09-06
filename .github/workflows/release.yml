@@ -57,6 +57,7 @@ jobs:
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: true
+      draft-release: true
 
   release:
     needs: [build, provenance]
