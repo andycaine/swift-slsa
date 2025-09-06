@@ -41,12 +41,6 @@ jobs:
           if-no-files-found: error
           retention-days: 5
 
-  check:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Hashes ${{ needs.build.outputs.hashes }}"
-
   provenance:
     needs: [build]
     permissions:
